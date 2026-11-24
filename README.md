@@ -1,45 +1,90 @@
-# React + Vite
+# Product Catalog — Laboratory Exercise 3
 
+A responsive mini product catalog demonstrating React props, component reuse, callback props, conditional rendering, `children`, and rendering lists with `.map()`.
 
-# Lab 4 Guide Questions
+## Requirements
 
-## 1. Why do we use two separate states, searchText and debouncedSearch, instead of only one?
-`searchText` holds exactly what the user is typing, so the input updates instantly on every keystroke. `debouncedSearch` holds the value actually used for filtering, and it only updates after the user pauses for 300 ms. If we used one state, either the input would feel laggy (if we delayed it) or the list would re-filter on every keystroke (if we didn't). Two states let the input stay responsive while the filtering waits.
+- Node.js (LTS recommended)
+- npm
 
-## 2. What would happen if the debounce effect did not return a cleanup function?
-Each keystroke would start a new timer without cancelling the old one. Every timer would eventually fire and call `setDebouncedSearch`, so the list would still update once per keystroke, just delayed by 300 ms. Old timers could also fire with outdated values, and one could run after the component unmounts. The cleanup (`clearTimeout`) cancels the previous timer so only the last pause in typing triggers an update.
+## Run the project
 
-## 3. What is the purpose of the dependency array?
-The dependency array tells React when to re-run an effect: only after a render where one of the listed values has changed.
-- **Empty (`[]`):** the effect runs only once, after the first render. For the debounce effect, this would mean the timer never restarts when the user types, so `debouncedSearch` would only ever be set once and search would not work.
-- **Left out completely:** the effect runs after every render. For the debounce effect, it would restart its timer on every render, including renders caused by unrelated state changes like clicking Add to Cart, and for effects that set state it could cause an infinite loop.
+1. Extract the ZIP file.
+2. Open the `product-catalog` folder in VS Code.
+3. Open a terminal in that folder.
+4. Install dependencies:
 
-## 4. Why should we avoid sorting the original products array directly?
-`.sort()` changes the array in place. Sorting the original would permanently change `products`, so "Default" order could never be restored, and the mutation could affect other parts of the app that use the same array. React also expects data not to be mutated directly. Copying first (`[...filteredProducts]`) keeps the original safe and lets the order go back to default.
+   ```bash
+   npm install
+   ```
 
-## 5. Should the filtered list be stored in state or calculated during rendering?
-It should be calculated during rendering. The filtered list depends entirely on `debouncedSearch`, `category`, `sortOrder`, and the products data, so it is derived data. Storing it in its own state would duplicate information and require extra effects or setters to keep it in sync, which can lead to bugs where the list and the filters disagree. Calculating it each render keeps a single source of truth, and the list always matches the current filters automatically.
+5. Start the development server:
 
+   ```bash
+   npm run dev
+   ```
 
+6. Open the local URL printed in the terminal (usually `http://localhost:5173`).
 
+To verify a production build, run `npm run build`.
 
+## Project structure
 
+```text
+product-catalog/
+├── public/
+├── src/
+│   ├── components/
+│   │   ├── ProductCard.jsx
+│   │   └── ProductCard.css
+│   ├── data/
+│   │   └── products.js
+│   ├── App.jsx
+│   ├── App.css
+│   └── main.jsx
+├── .gitignore
+├── index.html
+├── package.json
+├── README.md
+└── vite.config.js
+```
 
+## Guide questions
 
+1. **What is the difference between props and state?**  
+   Props are values passed from a parent component to a child component. State is data a component manages and can update over time. In this project, product details are passed as props, while the cart count and last-added product are stored as state in `App`.
 
+2. **Why can a child component not modify the props it receives?**  
+   Props are read-only. Keeping them read-only makes data flow predictable and lets the parent remain responsible for the values it passes to its children.
 
+3. **How does the `onAddToCart` callback allow data to flow from child to parent even though props only flow downward?**  
+   The parent passes a function to the child as a prop. When the user clicks the button, the child calls that function and sends the product title. The function runs in the parent, allowing the parent to update its cart state.
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+4. **Why is the `key` prop required when rendering a list with `.map()`? What could happen if it is missing or duplicated?**  
+   A key gives each rendered item a stable identity so React can track items between renders. Missing or duplicated keys can cause warnings and make updates or reused elements behave unexpectedly.
 
-Currently, two official plugins are available:
+5. **What does the `children` prop allow you to do that a normal prop does not?**  
+   `children` lets a component receive content placed between its opening and closing tags. This makes it easy to place flexible content, such as a New or Sale badge, inside a reusable product card.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Git and GitHub submission
 
-## React Compiler
+Run these commands from the project folder, replacing the URL with the URL of your own **private** GitHub repository:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+git init
+git add .
+git commit -m "Initial Vite project setup"
+git add src/data/products.js
+git commit -m "Add sample product data"
+git add src/components
+git commit -m "Create reusable ProductCard component"
+git add src/App.jsx
+git commit -m "Add cart callback and running message"
+git add src
+git commit -m "Style responsive product catalog"
+git branch -M main
+git remote add origin https://github.com/YOUR-USERNAME/product-catalog.git
+git push -u origin main
+```
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Create the GitHub repository with **Private** visibility. Do not add collaborators unless you choose to grant them access.

@@ -1,95 +1,63 @@
-import { useState, useEffect } from "react";
-import products from "./data/products";
-import ProductCard from "./components/ProductCard";
-import SearchBar from "./components/SearchBar";
-import "./App.css";
-
-const badges = { 1: "New", 5: "Sale" };
+import { useState } from 'react'
+import ProductCard from './components/ProductCard.jsx'
+import products from './data/products.js'
 
 function App() {
-  // Cart state from Lab 3
-  const [count, setCount] = useState(0);
-  const [lastAdded, setLastAdded] = useState("");
+  const [cartCount, setCartCount] = useState(0)
+  const [lastAdded, setLastAdded] = useState('')
 
-  // Lab 4 state
-  const [searchText, setSearchText] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const [sortOrder, setSortOrder] = useState("default");
-
-  // Debounce: wait 300 ms after the last keystroke before filtering
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchText);
-    }, 300);
-
-    return () => clearTimeout(timer); // cleanup
-  }, [searchText]);
-
-  const handleAddToCart = (title) => {
-    setCount((prev) => prev + 1);
-    setLastAdded(title);
-  };
-
-  const handleClear = () => {
-    setSearchText("");
-    setDebouncedSearch("");
-    setCategory("All");
-    setSortOrder("default");
-  };
-
-  // Derived list: filter first, then sort a copy
-  const filteredProducts = products
-    .filter((p) =>
-      p.title.toLowerCase().includes(debouncedSearch.trim().toLowerCase())
-    )
-    .filter((p) => category === "All" || p.category === category);
-
-  const displayedProducts = [...filteredProducts];
-  if (sortOrder === "asc") {
-    displayedProducts.sort((a, b) => a.price - b.price);
-  } else if (sortOrder === "desc") {
-    displayedProducts.sort((a, b) => b.price - a.price);
+  function handleAddToCart(productTitle) {
+    setCartCount((currentCount) => currentCount + 1)
+    setLastAdded(productTitle)
   }
 
-  // Update the browser tab title whenever the number of results changes
-  useEffect(() => {
-    document.title = `CvSU Mini Store (${displayedProducts.length} results)`;
-  }, [displayedProducts.length]);
-
   return (
-    <div className="app">
-      <header>
-        <h1>CvSU Mini Store</h1>
+    <main className="page-shell">
+      <header className="site-header">
+        <div className="site-header__brand">
+          <span className="brand-mark" aria-hidden="true">C</span>
+          <span>CvSU <strong>Mini Store</strong></span>
+        </div>
+        <span className="header-tagline">Simple finds. Smart choices.</span>
       </header>
 
-      <p className="cart-message">
-        {count === 0
-          ? "Your cart is empty."
-          : `Items added to cart: ${count} (Last added: ${lastAdded})`}
-      </p>
-
-      <SearchBar
-        searchText={searchText}
-        onSearchChange={setSearchText}
-        category={category}
-        onCategoryChange={setCategory}
-        sortOrder={sortOrder}
-        onSortChange={setSortOrder}
-        onClear={handleClear}
-      />
-
-      <p className="result-count">
-        Showing {displayedProducts.length} of {products.length} products
-      </p>
-
-      {displayedProducts.length === 0 ? (
-        <p className="empty-state">
-          No products found. Try a different keyword or category.
+      <section className="hero">
+        <p className="eyebrow">WELCOME TO OUR STORE</p>
+        <h1>Find what you need.</h1>
+        <p className="hero__description">
+          Browse our collection of everyday essentials, school supplies, and tech accessories.
         </p>
-      ) : (
-        <div className="grid">
-          {displayedProducts.map((product) => (
+      </section>
+
+      <section className="cart-summary" aria-live="polite">
+        <div className="cart-summary__icon" aria-hidden="true">🛒</div>
+        <div>
+          {cartCount === 0 ? (
+            <>
+              <p className="cart-summary__title">Your cart is empty.</p>
+              <p className="cart-summary__detail">Add an in-stock item to get started.</p>
+            </>
+          ) : (
+            <>
+              <p className="cart-summary__title">Items added to cart: {cartCount}</p>
+              <p className="cart-summary__detail">Last added: {lastAdded}</p>
+            </>
+          )}
+        </div>
+        <span className="cart-count">{cartCount}</span>
+      </section>
+
+      <section className="catalog-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">OUR COLLECTION</p>
+            <h2>Featured Products</h2>
+          </div>
+          <span className="product-count">{products.length} products</span>
+        </div>
+
+        <div className="product-grid">
+          {products.map((product) => (
             <ProductCard
               key={product.id}
               title={product.title}
@@ -98,13 +66,19 @@ function App() {
               inStock={product.inStock}
               onAddToCart={handleAddToCart}
             >
-              {badges[product.id] && <span>{badges[product.id]}</span>}
+              {product.id === 1 && <span>Best Seller</span>}
+              {product.id === 5 && <span>New</span>}
             </ProductCard>
           ))}
         </div>
-      )}
-    </div>
-  );
+      </section>
+
+      <footer className="site-footer">
+        <p>© {new Date().getFullYear()} CvSU Mini Store</p>
+        <p>Built with reusable React components and props.</p>
+      </footer>
+    </main>
+  )
 }
 
-export default App;
+export default App
